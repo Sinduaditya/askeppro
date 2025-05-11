@@ -8,7 +8,8 @@
     <title>@yield('title', 'AskepPro') - Aplikasi Asuhan Keperawatan Digital</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --sidebar-width: 260px;
@@ -453,64 +454,87 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
     </style>
+    <link href="{{ asset('assets/css/components/preloader.css') }}" rel="stylesheet">
     @yield('styles')
 </head>
 
 <body>
+    <div class="askep-preloader">
+        <div class="askep-preloader__content">
+            <div class="askep-preloader__progress">
+                <div class="askep-preloader__progress-bar"></div>
+            </div>
+            <div class="askep-preloader__text">
+                Memuat ASKEP Pro...
+            </div>
+        </div>
+    </div>
+
     <div class="d-flex" id="wrapper">
         <!-- Sidebar -->
         <div id="sidebar-wrapper">
             <div class="sidebar-logo">
-            <div class="logo-container">
-                <div class="logo-icon">
-                <i class="fas fa-stethoscope"></i>
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <h1 class="logo-text toggle-hide">AskepPro</h1>
                 </div>
-                <h1 class="logo-text toggle-hide">AskepPro</h1>
-            </div>
             </div>
 
             <div class="sidebar-menu">
-            <div class="menu-category toggle-hide">Navigasi</div>
-            <ul>
-                <li class="menu-item">
-                <a href="{{ route('dashboard') }}" class="menu-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard">
-                    <span class="menu-icon"><i class="fas fa-tachometer-alt"></i></span>
-                    <span class="menu-text toggle-hide">Dashboard</span>
-                </a>
-                </li>
-                <li class="menu-item">
-                <a href="{{ route('patients.index') }}" class="menu-link {{ request()->routeIs('patients.*') ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Data Pasien">
-                    <span class="menu-icon"><i class="fas fa-user-injured"></i></span>
-                    <span class="menu-text toggle-hide">Data Pasien</span>
-                </a>
-                </li>
-            </ul>
+                <div class="menu-category toggle-hide">Navigasi</div>
+                <ul>
+                    <li class="menu-item">
+                        <a href="{{ route('dashboard') }}"
+                            class="menu-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"
+                            data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard">
+                            <span class="menu-icon"><i class="fas fa-tachometer-alt"></i></span>
+                            <span class="menu-text toggle-hide">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ route('patients.index') }}"
+                            class="menu-link {{ request()->routeIs('patients.*') ? 'active' : '' }}"
+                            data-bs-toggle="tooltip" data-bs-placement="right" title="Data Pasien">
+                            <span class="menu-icon"><i class="fas fa-user-injured"></i></span>
+                            <span class="menu-text toggle-hide">Data Pasien</span>
+                        </a>
+                    </li>
+                </ul>
 
-            <div class="menu-category toggle-hide">Bantuan</div>
-            <ul>
-                <li class="menu-item">
-                <a href="{{ route('guide.index') }}" class="menu-link {{ request()->routeIs('guide.*') ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Panduan">
-                    <span class="menu-icon"><i class="fas fa-book-medical"></i></span>
-                    <span class="menu-text toggle-hide">Panduan</span>
-                </a>
-                </li>
-            </ul>
+                <div class="menu-category toggle-hide">Bantuan</div>
+                <ul>
+                    <li class="menu-item">
+                        <a href="{{ route('guide.index') }}"
+                            class="menu-link {{ request()->routeIs('guide.*') ? 'active' : '' }}"
+                            data-bs-toggle="tooltip" data-bs-placement="right" title="Panduan">
+                            <span class="menu-icon"><i class="fas fa-book-medical"></i></span>
+                            <span class="menu-text toggle-hide">Panduan</span>
+                        </a>
+                    </li>
+                </ul>
             </div>
 
             <div class="sidebar-footer">
-            <div class="user-info">
-                <div class="user-avatar">
-                {{ substr(Auth::user()->name, 0, 1) }}
+                <div class="user-info">
+                    <div class="user-avatar">
+                        {{ substr(Auth::user()->name, 0, 1) }}
+                    </div>
+                    <div class="user-details toggle-hide">
+                        <p class="user-name">{{ Auth::user()->name }}</p>
+                        <p class="user-role">{{ auth()->user()->role }}</p>
+                    </div>
                 </div>
-                <div class="user-details toggle-hide">
-                <p class="user-name">{{ Auth::user()->name }}</p>
-                <p class="user-role">{{ auth()->user()->role }}</p>
-                </div>
-            </div>
             </div>
         </div>
 
@@ -538,7 +562,7 @@
 
                         <div class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center rounded-pill" href="#"
-                               id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <div class="user-avatar rounded-circle">
                                     {{ substr(Auth::user()->name, 0, 1) }}
                                 </div>
@@ -560,34 +584,36 @@
             </div>
 
             <div class="content-container">
-                @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-                    <div class="d-flex">
-                        <div class="me-3">
-                            <i class="fas fa-check-circle fa-2x"></i>
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1">Berhasil</h5>
+                                <p class="mb-0">{{ session('success') }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h5 class="fw-bold mb-1">Berhasil</h5>
-                            <p class="mb-0">{{ session('success') }}</p>
-                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                            aria-label="Close"></button>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
                 @endif
 
-                @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-                    <div class="d-flex">
-                        <div class="me-3">
-                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                @if (session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1">Error</h5>
+                                <p class="mb-0">{{ session('error') }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h5 class="fw-bold mb-1">Error</h5>
-                            <p class="mb-0">{{ session('error') }}</p>
-                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                            aria-label="Close"></button>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
                 @endif
 
                 @yield('content')
@@ -602,6 +628,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('assets/js/components/preloader.js') }}"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const toggle = document.getElementById("menu-toggle");
@@ -676,11 +704,12 @@
 
             // Initialize tooltips
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
         });
     </script>
     @yield('scripts')
 </body>
+
 </html>

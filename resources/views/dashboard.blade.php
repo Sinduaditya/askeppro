@@ -230,11 +230,19 @@
                         </div>
                         <h6 class="text-uppercase mb-1 opacity-75">Total Pasien</h6>
                         <div class="d-flex align-items-baseline">
-                            <h2 class="display-5 fw-bold mb-0">{{ $totalPatients }}</h2>
-                            <span class="ms-2 badge bg-white bg-opacity-25">+3 minggu ini</span>
+                            <h2 class="display-5 fw-bold mb-0">{{ $totalCases }}</h2>
+                            <span class="ms-2 badge bg-white bg-opacity-25">
+                                @if ($totalPatients > 0)
+                                    {{ round(($totalCases / $totalPatients) * 100) }}% pasien
+                                @else
+                                    0% pasien
+                                @endif
+                            </span>
                         </div>
                         <div class="progress mt-3" style="height: 6px">
-                            <div class="progress-bar bg-white bg-opacity-50" role="progressbar" style="width: 75%"></div>
+                            <div class="progress-bar bg-white bg-opacity-50" role="progressbar" {{-- Set width to 0 if totalPatients is zero --}}
+                                style="width: {{ $totalPatients > 0 ? ($totalCases / $totalPatients) * 100 : 0 }}%">
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer bg-transparent border-0">
@@ -257,7 +265,12 @@
                         <h6 class="text-uppercase mb-1 opacity-75">Total Kasus Askep</h6>
                         <div class="d-flex align-items-baseline">
                             <h2 class="display-5 fw-bold mb-0">{{ $totalCases }}</h2>
-                            <span class="ms-2 badge bg-white bg-opacity-25">{{ round(($totalCases / $totalPatients) * 100) }}%
+                            <span class="ms-2 badge bg-white bg-opacity-25">
+                                @if ($totalPatients > 0)
+                                    {{ round(($totalCases / $totalPatients) * 100) }}%
+                                @else
+                                    0%
+                                @endif
                                 pasien</span>
                         </div>
                         <div class="progress mt-3" style="height: 6px">
