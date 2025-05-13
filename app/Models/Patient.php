@@ -11,16 +11,7 @@ class Patient extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'name',
-        'medical_record_number',
-        'birth_date',
-        'gender',
-        'blood_type',
-        'address',
-        'notes'
-    ];
+    protected $fillable = ['user_id', 'name', 'medical_record_number', 'birth_date', 'gender', 'blood_type', 'address', 'notes'];
 
     protected $casts = [
         'birth_date' => 'datetime',
@@ -40,5 +31,10 @@ class Patient extends Model
     public function askepCases(): HasMany
     {
         return $this->hasMany(AskepCase::class);
+    }
+
+    public function getFormattedMedicalRecordAttribute()
+    {
+        return $this->medical_record_number ?? 'Belum ada nomor rekam medis';
     }
 }

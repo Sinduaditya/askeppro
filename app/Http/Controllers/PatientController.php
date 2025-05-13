@@ -24,7 +24,7 @@ class PatientController extends Controller
             'name' => 'required|string|max:255',
             'birth_date' => 'required|date',
             'gender' => 'required|in:male,female',
-            'medical_record_number' => 'required|string|max:50|unique:patients',
+            'medical_record_number' => 'nullable|string|max:50|unique:patients',
             'blood_type' => 'nullable|string',
             'address' => 'nullable|string',
             'notes' => 'nullable|string',

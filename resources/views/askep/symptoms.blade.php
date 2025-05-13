@@ -1,3 +1,4 @@
+<!-- filepath: e:\Joki\upi_joki\AskepPro\askeppro\resources\views\askep\symptoms.blade.php -->
 @extends('layouts.app')
 
 @section('title', 'Pilih Gejala Pasien')
@@ -143,36 +144,6 @@
             color: #64748b;
             font-size: 1.1rem;
             opacity: 0.7;
-        }
-
-        .filter-container {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-button {
-            padding: 0.5rem 1rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: #64748b;
-            background: white;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .filter-button:hover {
-            background: #f8fafc;
-            border-color: #d1d5db;
-        }
-
-        .filter-button.active {
-            background: #1e88e5;
-            color: white;
-            border-color: #1e88e5;
         }
 
         /* Symptoms Cards */
@@ -516,6 +487,11 @@
         .delay-3 {
             animation-delay: 0.3s;
         }
+
+        /* Sembunyikan filter kategori */
+        .filter-container {
+            display: none !important;
+        }
     </style>
 @endsection
 
@@ -568,7 +544,7 @@
                             <div>
                                 <h5 class="patient-name">{{ $patient->name }}</h5>
                                 <div class="patient-record">
-                                    <i class="fas fa-fingerprint me-1"></i> {{ $patient->medical_record_number }}
+                                    <i class="fas fa-fingerprint me-1"></i> {{ $patient->medical_record_number ?? 'Belum ada nomor rekam medis' }}
                                 </div>
                             </div>
                         </div>
@@ -590,9 +566,7 @@
                         <input type="hidden" name="patient_id" value="{{ $patient->id }}">
                         <input type="hidden" name="symptoms[]" value="" disabled id="dummy-symptom">
 
-
                         <div class="buttons-container fade-in delay-3">
-
                             <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
                                 <i class="fas fa-stethoscope"></i>Lanjut ke Diagnosis
                             </button>
@@ -601,18 +575,11 @@
                 </div>
 
                 <div class="col-lg-8">
-                    <!-- Search and Filter -->
+                    <!-- Search Input -->
                     <div class="search-container position-relative fade-in delay-2">
-                        {{-- <i class="fas fa-search search-icon"></i> --}}
+                        <i class="fas fa-search search-icon"></i>
                         <input type="text" class="search-input" id="searchSymptoms"
-                            placeholder="Cari tanda dan gejala..." hidden>
-
-                        <div class="filter-container">
-                            <button class="filter-button active" data-category="all">Semua Kategori</button>
-                            <button class="filter-button" data-category="vital">Tanda Vital</button>
-                            <button class="filter-button" data-category="physical">Fisik</button>
-                            <button class="filter-button" data-category="psychological">Psikologis</button>
-                        </div>
+                            placeholder="Cari tanda dan gejala...">
                     </div>
 
                     <!-- Symptoms List -->
@@ -622,8 +589,7 @@
                         </div>
 
                         @foreach ($symptoms as $symptom)
-                            <div class="symptom-item"
-                                data-category="{{ $loop->index % 3 == 0 ? 'vital' : ($loop->index % 3 == 1 ? 'physical' : 'psychological') }}">
+                            <div class="symptom-item">
                                 <label class="custom-checkbox">
                                     <input type="checkbox" name="symptoms[]" value="{{ $symptom->id }}"
                                         id="symptom{{ $symptom->id }}" class="symptom-checkbox">
@@ -650,7 +616,6 @@
             const selectedSymptoms = document.getElementById('selectedSymptoms');
             const emptySelection = document.getElementById('emptySelection');
             const searchInput = document.getElementById('searchSymptoms');
-            const filterButtons = document.querySelectorAll('.filter-button');
             const symptomItems = document.querySelectorAll('.symptom-item');
             const submitBtn = document.getElementById('submitBtn');
             const form = document.getElementById('symptomsForm');
@@ -667,15 +632,6 @@
             if (searchInput) {
                 searchInput.addEventListener('input', filterSymptoms);
             }
-
-            // Handle filter buttons
-            filterButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    filterSymptoms();
-                });
-            });
 
             function updateSelectedSymptoms() {
                 const selected = Array.from(checkboxes).filter(cb => cb.checked);
@@ -721,15 +677,12 @@
 
             function filterSymptoms() {
                 const searchTerm = searchInput && searchInput.value ? searchInput.value.toLowerCase() : '';
-                const activeFilter = document.querySelector('.filter-button.active').dataset.category;
 
                 symptomItems.forEach(item => {
                     const symptomText = item.querySelector('.symptom-label').textContent.toLowerCase();
-                    const category = item.dataset.category;
                     const isSearchMatch = searchTerm === '' || symptomText.includes(searchTerm);
-                    const isCategoryMatch = activeFilter === 'all' || category === activeFilter;
 
-                    if (isSearchMatch && isCategoryMatch) {
+                    if (isSearchMatch) {
                         item.style.display = '';
                     } else {
                         item.style.display = 'none';
@@ -771,6 +724,7 @@
                 // Now submit the form with the added hidden fields
                 form.submit();
             });
+
             // Initialize
             updateSelectedSymptoms();
         });

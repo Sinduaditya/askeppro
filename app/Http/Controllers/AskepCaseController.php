@@ -64,12 +64,28 @@ class AskepCaseController extends Controller
             $totalCount = count($mainIds);
             $percent = $totalCount ? ($matchedCount / $totalCount) * 100 : 0;
 
+            // Ambil nama gejala yang cocok dan tidak cocok
+            $matchedSymptoms = [];
+            $unmatchedSymptoms = [];
+
+            foreach ($diagnosis->symptoms as $symptom) {
+                if (in_array($symptom->id, $symptomIds)) {
+                    $matchedSymptoms[] = $symptom->name;
+                } else {
+                    $unmatchedSymptoms[] = $symptom->name;
+                }
+            }
+
             $results[] = [
                 'diagnosis' => $diagnosis,
-                'matched' => $matchedCount, // Add this line
-                'total' => $totalCount, // Add this line
+                'matched' => $matchedCount,
+                'total' => $totalCount,
                 'percent' => $percent,
                 'status' => $percent >= 80 ? 'memenuhi' : 'tidak',
+                'symptoms' => [
+                    'matched' => $matchedSymptoms,
+                    'unmatched' => $unmatchedSymptoms,
+                ],
             ];
         }
 
@@ -463,33 +479,69 @@ class AskepCaseController extends Controller
 
     public function printReport($id)
     {
-        $case = AskepCase::with(['patient', 'diagnosis', 'symptoms', 'outcomes.outcomeStandard', 'implementations.intervention', 'evaluation'])->findOrFail($id);
+        try {
+            // Load data dengan semua relasi yang diperlukan
+            $case = AskepCase::with(['patient', 'diagnoses', 'diagnosis', 'symptoms', 'outcomes.outcomeStandard', 'implementations.intervention', 'evaluation'])->findOrFail($id);
 
-        // Validasi data sebelum passing ke view
-        foreach ($case->outcomes as $outcome) {
-            if (!$outcome->outcomeStandard) {
-                // Log error atau tambahkan informasi default
-                Log::warning("Outcome ID {$outcome->id} tidak memiliki OutcomeStandard");
+            // Validasi data sebelum menghasilkan PDF
+            foreach ($case->outcomes as $outcome) {
+                if (!$outcome->outcomeStandard) {
+                    Log::warning("Outcome ID {$outcome->id} tidak memiliki OutcomeStandard");
+                }
             }
-        }
 
-        foreach ($case->implementations as $implementation) {
-            if (!$implementation->intervention) {
-                Log::warning("Implementation ID {$implementation->id} tidak memiliki Intervention");
+            foreach ($case->implementations as $implementation) {
+                if (!$implementation->intervention) {
+                    Log::warning("Implementation ID {$implementation->id} tidak memiliki Intervention");
+                }
             }
-        }
 
-        // Lanjutkan dengan kode yang ada
-        $pdf = Pdf::loadView('reports.askep_report', compact('case'));
-        $pdf->setPaper('a4', 'portrait');
-        $filename = 'AskepReport_' . $case->patient->medical_record . '_' . date('Ymd_His') . '.pdf';
-        return $pdf->download($filename);
+            // Konfigurasi Dompdf
+            $options = [
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'defaultFont' => 'dejavu sans',
+                'chroot' => base_path(), // Set ke base path aplikasi
+                'logOutputFile' => storage_path('logs/pdf.htm'),
+                'tempDir' => storage_path('app/pdf-temp'),
+                'fontDir' => storage_path('fonts/'),
+                'fontCache' => storage_path('fonts/'),
+            ];
+
+            // Buat direktori temp jika belum ada
+            if (!file_exists(storage_path('app/pdf-temp'))) {
+                mkdir(storage_path('app/pdf-temp'), 0755, true);
+            }
+
+            // Load PDF dengan konfigurasi
+            $pdf = PDF::loadView('reports.askep_report', compact('case'))->setOptions($options);
+
+            $pdf->setPaper('a4', 'portrait');
+
+            // Generate filename dengan safe value untuk medical_record
+            $medicalRecord = $case->patient->medical_record_number ?? 'unknown';
+            $medicalRecord = preg_replace('/[^A-Za-z0-9\-_]/', '', $medicalRecord);
+            $filename = 'AskepReport_' . $medicalRecord . '_' . date('Ymd_His') . '.pdf';
+
+            // Return download response
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            // Log error dengan detail
+            Log::error('PDF Generation Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            // Kembalikan pesan error yang friendly
+            return back()->with('error', 'Gagal mengunduh PDF: ' . $e->getMessage());
+        }
     }
 
     public function getReportData($id)
     {
         $case = AskepCase::with(['patient', 'diagnosis', 'symptoms', 'implementations.intervention', 'outcomes.outcomeStandard', 'evaluation'])->findOrFail($id);
 
-        return view('reports.askep_report_content', compact('case'));
+        return view('reports.askep_report', compact('case'));
     }
 }
